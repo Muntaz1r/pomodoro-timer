@@ -2,13 +2,15 @@
 
 A Pomodoro timer built with vanilla HTML, CSS, and JavaScript.
 
+**Live demo:** https://pomodoro-timer-xi-two.vercel.app/
+
 ## How to run
 
 You only need a browser. No installs required.
 
 **Just open the file:**
 ```
-double-click pomodoro.html
+double-click index.html
 ```
 
 ## Features

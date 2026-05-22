@@ -2,7 +2,9 @@
 
 ## 1. How to run
 
-No installs are needed beyond a browser. Double-click `pomodoro.html` to open it directly.
+No installs are needed beyond a browser. Double-click `index.html` to open it directly.
+
+**Live demo:** https://pomodoro-timer-xi-two.vercel.app/
 
 ## 2. Stack & design choices
 
