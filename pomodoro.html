@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,100;1,9..144,100&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <span class="wordmark">pomodoro</span>
+    <button class="settings-btn" id="settingsToggle">settings</button>
+  </header>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-row">
+      <span class="settings-label">Focus</span>
+      <div class="settings-input-wrap">
+        <button class="num-btn" onclick="adjustMins('focus',-1)">−</button>
+        <span id="focusDisplay">25</span>
+        <button class="num-btn" onclick="adjustMins('focus',1)">+</button>
+        <span class="settings-label">min</span>
+      </div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Break</span>
+      <div class="settings-input-wrap">
+        <button class="num-btn" onclick="adjustMins('break',-1)">−</button>
+        <span id="breakDisplay">5</span>
+        <button class="num-btn" onclick="adjustMins('break',1)">+</button>
+        <span class="settings-label">min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ring-wrap">
+    <svg class="ring-svg" id="ringSvg" viewBox="0 0 100 100">
+      <circle class="ring-track" cx="50" cy="50" r="44"/>
+      <circle class="ring-progress" id="ringProgress" cx="50" cy="50" r="44"/>
+    </svg>
+    <div class="ring-inner">
+      <span class="mode-label" id="modeLabel">focus</span>
+      <span class="countdown" id="countdown">25:00</span>
+      <span class="session-count" id="sessionCount">session 1</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-secondary" onclick="reset()">reset</button>
+    <button class="btn btn-primary" id="mainBtn" onclick="toggleTimer()">start</button>
+    <button class="btn btn-skip" onclick="skip()" title="Skip">▶▶</button>
+  </div>
+
+  <div class="history-section">
+    <div class="history-title">Today's sessions</div>
+    <ul class="history-list" id="historyList">
+      <li class="history-empty" id="historyEmpty">No sessions yet — start focusing!</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
