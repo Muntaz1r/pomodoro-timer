@@ -5,6 +5,326 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pomodoro</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,100;1,9..144,100&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ring:  #7c6aff;
+      --glow:  #5040cc;
+      --bg1:   #0d0f1a;
+      --bg2:   #1a1030;
+      --text:  #e8e4ff;
+      --muted: #6b6590;
+      --t: 1.2s;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem 3rem;
+      background: radial-gradient(ellipse at 50% 30%, var(--bg2) 0%, var(--bg1) 70%);
+      color: var(--text);
+      transition: background var(--t), color var(--t);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+    }
+
+    .app {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* ── header ── */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .wordmark {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 100;
+      font-size: 1.5rem;
+      opacity: 0.7;
+    }
+
+    .settings-btn {
+      background: none;
+      border: 1px solid var(--muted);
+      cursor: pointer;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.8rem;
+      border-radius: 2rem;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .settings-btn:hover { opacity: 1; }
+
+    /* ── settings panel ── */
+    .settings-panel {
+      display: none;
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 1rem;
+      padding: 1.4rem 1.6rem;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .settings-panel.open { display: flex; }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .settings-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .settings-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .num-btn {
+      background: rgba(255,255,255,0.06);
+      border: none;
+      cursor: pointer;
+      color: var(--text);
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .num-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── ring ── */
+    .ring-wrap {
+      position: relative;
+      width: min(320px, 78vw);
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ring-svg {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      transform: rotate(-90deg);
+      filter: drop-shadow(0 0 18px var(--glow));
+      transition: filter var(--t), opacity var(--t);
+    }
+
+    .ring-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.04);
+      stroke-width: 6;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: var(--ring);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 276.46;
+      stroke-dashoffset: 0;
+      transition: stroke var(--t), stroke-dashoffset 1s linear;
+    }
+
+    @keyframes breathe {
+      0%, 100% { filter: drop-shadow(0 0 14px var(--glow)); }
+      50%       { filter: drop-shadow(0 0 32px var(--glow)); }
+    }
+    @keyframes burst {
+      0%   { transform: rotate(-90deg) scale(1); }
+      30%  { transform: rotate(-90deg) scale(1.07); filter: drop-shadow(0 0 50px var(--glow)); }
+      100% { transform: rotate(-90deg) scale(1); }
+    }
+
+    .ring-svg.breathing { animation: breathe var(--breath-speed, 4s) ease-in-out infinite; }
+    .ring-svg.burst     { animation: burst 0.7s ease-out forwards; }
+    .ring-svg.paused    { opacity: 0.5; }
+
+    /* ── ring inner ── */
+    .ring-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      user-select: none;
+    }
+
+    .mode-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .countdown {
+      font-family: 'Fraunces', serif;
+      font-weight: 100;
+      font-size: clamp(3.2rem, 16vw, 5.5rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      transition: opacity var(--t);
+    }
+    .countdown.paused { opacity: 0.6; }
+
+    .session-count {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── controls ── */
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn { border: none; cursor: pointer; transition: transform 0.15s, opacity 0.2s; }
+    .btn:hover  { transform: scale(1.05); }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--ring);
+      color: #fff;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.9rem 2.4rem;
+      border-radius: 3rem;
+      min-width: 140px;
+      box-shadow: 0 0 24px var(--glow);
+      transition: background var(--t), box-shadow var(--t), transform 0.15s;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.6rem 1rem;
+      border-radius: 2rem;
+      border: 1px solid currentColor;
+      opacity: 0.5;
+    }
+    .btn-secondary:hover { opacity: 1; }
+
+    .btn-skip {
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.65rem;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      width: 2.2rem;
+      height: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.4;
+    }
+    .btn-skip:hover { opacity: 0.9; }
+
+    /* ── history ── */
+    .history-section { width: 100%; }
+
+    .history-title {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-height: 220px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .history-list::-webkit-scrollbar { display: none; }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      animation: slideIn 0.4s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .history-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ring);
+      flex-shrink: 0;
+      transition: background var(--t);
+    }
+
+    .history-empty {
+      font-size: 0.68rem;
+      color: var(--muted);
+      opacity: 0.4;
+      font-style: italic;
+    }
+
+    @media (max-width: 400px) {
+      body { padding: 1.2rem 0.8rem 2rem; }
+      .ring-wrap { width: 85vw; }
+    }
+  </style>
 </head>
 <body>
 <div class="app">
