@@ -1,330 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pomodoro</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,100;1,9..144,100&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --ring:  #7c6aff;
-      --glow:  #5040cc;
-      --bg1:   #0d0f1a;
-      --bg2:   #1a1030;
-      --text:  #e8e4ff;
-      --muted: #6b6590;
-      --t: 1.2s;
-    }
+  :root {
+    --ring:  #7c6aff;
+    --glow:  #5040cc;
+    --bg1:   #0d0f1a;
+    --bg2:   #1a1030;
+    --text:  #e8e4ff;
+    --muted: #6b6590;
+    --t: 1.2s;
+  }
 
-    html, body { height: 100%; }
+  html, body { height: 100%; }
 
-    body {
-      font-family: 'DM Mono', monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 2rem 1rem 3rem;
-      background: radial-gradient(ellipse at 50% 30%, var(--bg2) 0%, var(--bg1) 70%);
-      color: var(--text);
-      transition: background var(--t), color var(--t);
-      overflow-x: hidden;
-    }
+  body {
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem 3rem;
+    background: radial-gradient(ellipse at 50% 30%, var(--bg2) 0%, var(--bg1) 70%);
+    color: var(--text);
+    transition: background var(--t), color var(--t);
+    overflow-x: hidden;
+  }
 
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.03;
-      pointer-events: none;
-    }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
 
-    .app {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-    }
+  .app {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
 
-    /* ── header ── */
-    header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
+  header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 
-    .wordmark {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 100;
-      font-size: 1.5rem;
-      opacity: 0.7;
-    }
+  .wordmark {
+    font-family: 'Outfit', sans-serif;
+    font-style: italic;
+    font-weight: 100;
+    font-size: 1.5rem;
+    opacity: 0.7;
+  }
 
-    .settings-btn {
-      background: none;
-      border: 1px solid var(--muted);
-      cursor: pointer;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.4rem 0.8rem;
-      border-radius: 2rem;
-      opacity: 0.5;
-      transition: opacity 0.2s;
-    }
-    .settings-btn:hover { opacity: 1; }
+  .settings-btn {
+    background: none;
+    border: 1px solid var(--muted);
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.8rem;
+    border-radius: 2rem;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .settings-btn:hover { opacity: 1; }
 
-    /* ── settings panel ── */
-    .settings-panel {
-      display: none;
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 1rem;
-      padding: 1.4rem 1.6rem;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .settings-panel.open { display: flex; }
+  .settings-panel {
+    display: none;
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 1rem;
+    padding: 1.4rem 1.6rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .settings-panel.open { display: flex; }
 
-    .settings-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .settings-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
+  .settings-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-    .settings-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+  .num-btn {
+    background: rgba(255,255,255,0.06);
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .num-btn:hover { background: rgba(255,255,255,0.12); }
 
-    .num-btn {
-      background: rgba(255,255,255,0.06);
-      border: none;
-      cursor: pointer;
-      color: var(--text);
-      width: 1.8rem;
-      height: 1.8rem;
-      border-radius: 50%;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-    .num-btn:hover { background: rgba(255,255,255,0.12); }
+  .ring-wrap {
+    position: relative;
+    width: min(320px, 78vw);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    /* ── ring ── */
-    .ring-wrap {
-      position: relative;
-      width: min(320px, 78vw);
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .ring-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 0 18px var(--glow));
+    transition: filter var(--t), opacity var(--t);
+  }
 
-    .ring-svg {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      transform: rotate(-90deg);
-      filter: drop-shadow(0 0 18px var(--glow));
-      transition: filter var(--t), opacity var(--t);
-    }
+  .ring-track {
+    fill: none;
+    stroke: rgba(255,255,255,0.04);
+    stroke-width: 6;
+  }
 
-    .ring-track {
-      fill: none;
-      stroke: rgba(255,255,255,0.04);
-      stroke-width: 6;
-    }
+  .ring-progress {
+    fill: none;
+    stroke: var(--ring);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 276.46;
+    stroke-dashoffset: 0;
+    transition: stroke var(--t), stroke-dashoffset 1s linear;
+  }
 
-    .ring-progress {
-      fill: none;
-      stroke: var(--ring);
-      stroke-width: 6;
-      stroke-linecap: round;
-      stroke-dasharray: 276.46;
-      stroke-dashoffset: 0;
-      transition: stroke var(--t), stroke-dashoffset 1s linear;
-    }
+  @keyframes breathe {
+    0%, 100% { filter: drop-shadow(0 0 14px var(--glow)); }
+    50%       { filter: drop-shadow(0 0 32px var(--glow)); }
+  }
+  @keyframes burst {
+    0%   { transform: rotate(-90deg) scale(1); }
+    30%  { transform: rotate(-90deg) scale(1.07); filter: drop-shadow(0 0 50px var(--glow)); }
+    100% { transform: rotate(-90deg) scale(1); }
+  }
 
-    @keyframes breathe {
-      0%, 100% { filter: drop-shadow(0 0 14px var(--glow)); }
-      50%       { filter: drop-shadow(0 0 32px var(--glow)); }
-    }
-    @keyframes burst {
-      0%   { transform: rotate(-90deg) scale(1); }
-      30%  { transform: rotate(-90deg) scale(1.07); filter: drop-shadow(0 0 50px var(--glow)); }
-      100% { transform: rotate(-90deg) scale(1); }
-    }
+  .ring-svg.breathing { animation: breathe var(--breath-speed, 4s) ease-in-out infinite; }
+  .ring-svg.burst     { animation: burst 0.7s ease-out forwards; }
+  .ring-svg.paused    { opacity: 0.5; }
 
-    .ring-svg.breathing { animation: breathe var(--breath-speed, 4s) ease-in-out infinite; }
-    .ring-svg.burst     { animation: burst 0.7s ease-out forwards; }
-    .ring-svg.paused    { opacity: 0.5; }
+  .ring-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    user-select: none;
+  }
 
-    /* ── ring inner ── */
-    .ring-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.3rem;
-      user-select: none;
-    }
+  .mode-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-    .mode-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+  .countdown {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 100;
+    font-size: clamp(3.2rem, 16vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    transition: opacity var(--t);
+  }
+  .countdown.paused { opacity: 0.6; }
 
-    .countdown {
-      font-family: 'Fraunces', serif;
-      font-weight: 100;
-      font-size: clamp(3.2rem, 16vw, 5.5rem);
-      line-height: 1;
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
-      transition: opacity var(--t);
-    }
-    .countdown.paused { opacity: 0.6; }
+  .session-count {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
 
-    .session-count {
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
+  .controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
 
-    /* ── controls ── */
-    .controls {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
+  .btn { border: none; cursor: pointer; transition: transform 0.15s, opacity 0.2s; }
+  .btn:hover  { transform: scale(1.05); }
+  .btn:active { transform: scale(0.97); }
 
-    .btn { border: none; cursor: pointer; transition: transform 0.15s, opacity 0.2s; }
-    .btn:hover  { transform: scale(1.05); }
-    .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--ring);
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.4rem;
+    border-radius: 3rem;
+    min-width: 140px;
+    box-shadow: 0 0 24px var(--glow);
+    transition: background var(--t), box-shadow var(--t), transform 0.15s;
+  }
 
-    .btn-primary {
-      background: var(--ring);
-      color: #fff;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.9rem 2.4rem;
-      border-radius: 3rem;
-      min-width: 140px;
-      box-shadow: 0 0 24px var(--glow);
-      transition: background var(--t), box-shadow var(--t), transform 0.15s;
-    }
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.6rem 1rem;
+    border-radius: 2rem;
+    border: 1px solid currentColor;
+    opacity: 0.5;
+  }
+  .btn-secondary:hover { opacity: 1; }
 
-    .btn-secondary {
-      background: transparent;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.6rem 1rem;
-      border-radius: 2rem;
-      border: 1px solid currentColor;
-      opacity: 0.5;
-    }
-    .btn-secondary:hover { opacity: 1; }
+  .btn-skip {
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.65rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.4;
+  }
+  .btn-skip:hover { opacity: 0.9; }
 
-    .btn-skip {
-      background: transparent;
-      color: var(--muted);
-      font-size: 0.65rem;
-      border: 1px solid currentColor;
-      border-radius: 50%;
-      width: 2.2rem;
-      height: 2.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.4;
-    }
-    .btn-skip:hover { opacity: 0.9; }
+  /* ── history ── */
+  .history-section { width: 100%; }
 
-    /* ── history ── */
-    .history-section { width: 100%; }
+  .history-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
 
-    .history-title {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding-bottom: 0.5rem;
-      margin-bottom: 0.8rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
+  .history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .history-list::-webkit-scrollbar { display: none; }
 
-    .history-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      max-height: 220px;
-      overflow-y: auto;
-      scrollbar-width: none;
-    }
-    .history-list::-webkit-scrollbar { display: none; }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    animation: slideIn 0.4s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-    .history-item {
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      animation: slideIn 0.4s ease-out;
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+  .history-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ring);
+    flex-shrink: 0;
+    transition: background var(--t);
+  }
 
-    .history-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--ring);
-      flex-shrink: 0;
-      transition: background var(--t);
-    }
+  .history-empty {
+    font-size: 0.68rem;
+    color: var(--muted);
+    opacity: 0.4;
+    font-style: italic;
+  }
 
-    .history-empty {
-      font-size: 0.68rem;
-      color: var(--muted);
-      opacity: 0.4;
-      font-style: italic;
-    }
-
-    @media (max-width: 400px) {
-      body { padding: 1.2rem 0.8rem 2rem; }
-      .ring-wrap { width: 85vw; }
-    }
-  </style>
+  @media (max-width: 400px) {
+    body { padding: 1.2rem 0.8rem 2rem; }
+    .ring-wrap { width: 85vw; }
+  }
+</style>
 </head>
 <body>
 <div class="app">
@@ -337,18 +327,18 @@
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-row">
       <span class="settings-label">Focus</span>
-      <div class="settings-input-wrap">
+      <div style="display:flex;align-items:center;gap:0.6rem">
         <button class="num-btn" onclick="adjustMins('focus',-1)">−</button>
-        <span id="focusDisplay">25</span>
+        <span id="focusDisplay" style="min-width:2.4rem;text-align:center">25</span>
         <button class="num-btn" onclick="adjustMins('focus',1)">+</button>
         <span class="settings-label">min</span>
       </div>
     </div>
     <div class="settings-row">
       <span class="settings-label">Break</span>
-      <div class="settings-input-wrap">
+      <div style="display:flex;align-items:center;gap:0.6rem">
         <button class="num-btn" onclick="adjustMins('break',-1)">−</button>
-        <span id="breakDisplay">5</span>
+        <span id="breakDisplay" style="min-width:2.4rem;text-align:center">5</span>
         <button class="num-btn" onclick="adjustMins('break',1)">+</button>
         <span class="settings-label">min</span>
       </div>
@@ -381,5 +371,197 @@
   </div>
 
 </div>
+<script>
+// Config + themes
+const THEMES = {
+  focus: { '--ring':'#7c6aff', '--glow':'#5040cc', '--bg1':'#0d0f1a', '--bg2':'#1a1030', '--text':'#e8e4ff', '--muted':'#6b6590' },
+  warn:  { '--ring':'#ff8c5a', '--glow':'#cc5520', '--bg1':'#0d0f1a', '--bg2':'#1a1030', '--text':'#e8e4ff', '--muted':'#6b6590' },
+  break: { '--ring':'#3dd6a3', '--glow':'#1a9970', '--bg1':'#0a1a14', '--bg2':'#0d2218', '--text':'#d4f5ea', '--muted':'#3d7a61' },
+};
+const CIRC = 276.46; // 2 * pi * 44
+
+let focusMins = 25, breakMins = 5;
+let mode = 'focus'; // focus, break
+let state = 'idle'; // idle, running, paused
+let totalSecs, remaining, sessionNum = 1, ticker = null;
+
+// DOM
+const ringSvg    = document.getElementById('ringSvg');
+const ringProg   = document.getElementById('ringProgress');
+const countdownEl= document.getElementById('countdown');
+const modeLabel  = document.getElementById('modeLabel');
+const sessionEl  = document.getElementById('sessionCount');
+const mainBtn    = document.getElementById('mainBtn');
+const historyList= document.getElementById('historyList');
+const historyEmpty=document.getElementById('historyEmpty');
+
+// Theme
+function setTheme(name) {
+  const vars = THEMES[name];
+  const root = document.documentElement.style;
+  Object.entries(vars).forEach(([k, v]) => root.setProperty(k, v));
+}
+
+// Ring
+function setRing(frac) {
+  ringProg.style.strokeDashoffset = CIRC * (1 - frac);
+}
+
+function setBreathing(on) {
+  ringSvg.style.setProperty('--breath-speed', mode === 'break' ? '6s' : '4s');
+  ringSvg.classList.toggle('breathing', on);
+  ringSvg.classList.toggle('paused', !on && state === 'paused');
+}
+
+function triggerBurst() {
+  ringSvg.classList.remove('breathing');
+  ringSvg.classList.add('burst');
+  setTimeout(() => { ringSvg.classList.remove('burst'); setBreathing(true); }, 750);
+}
+
+// Helpers
+function fmt(s) {
+  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+
+function initMode() {
+  totalSecs = (mode === 'focus' ? focusMins : breakMins) * 60;
+  remaining = totalSecs;
+  countdownEl.textContent = fmt(remaining);
+  countdownEl.classList.remove('paused');
+  modeLabel.textContent = mode;
+  setRing(1);
+  setTheme(mode);
+}
+
+// Audio
+function playDone() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.13;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t); osc.stop(t + 0.6);
+    });
+  } catch(e) {}
+}
+
+// History
+function todayKey() { return 'pomo_' + new Date().toISOString().slice(0,10); }
+
+function addHistoryEntry() {
+  const time = new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase();
+  const label = `✓ ${fmt(focusMins*60)} focus — ${time}`;
+  // save
+  const data = JSON.parse(localStorage.getItem(todayKey()) || '[]');
+  data.push({ label });
+  localStorage.setItem(todayKey(), JSON.stringify(data));
+  // prepend to DOM
+  historyEmpty.style.display = 'none';
+  const li = document.createElement('li');
+  li.className = 'history-item';
+  li.innerHTML = `<span class="history-dot"></span><span>${label}</span>`;
+  historyList.prepend(li);
+}
+
+function loadHistory() {
+  const data = JSON.parse(localStorage.getItem(todayKey()) || '[]');
+  if (!data.length) return;
+  historyEmpty.style.display = 'none';
+  data.slice().reverse().forEach(({ label }) => {
+    const li = document.createElement('li');
+    li.className = 'history-item';
+    li.innerHTML = `<span class="history-dot"></span><span>${label}</span>`;
+    historyList.appendChild(li);
+  });
+}
+
+// Timer
+function tick() {
+  remaining--;
+  countdownEl.textContent = fmt(remaining);
+  setRing(remaining / totalSecs);
+  if (mode === 'focus') setTheme(remaining <= 300 ? 'warn' : 'focus');
+  if (remaining <= 0) cycleEnd();
+}
+
+function cycleEnd() {
+  clearInterval(ticker); ticker = null;
+  triggerBurst(); playDone();
+  if (mode === 'focus') addHistoryEntry();
+  setTimeout(() => {
+    mode = mode === 'focus' ? 'break' : 'focus';
+    if (mode === 'focus') sessionNum++;
+    sessionEl.textContent = `session ${sessionNum}`;
+    initMode();
+    ticker = setInterval(tick, 1000);
+    state = 'running';
+    mainBtn.textContent = 'pause';
+    setBreathing(true);
+  }, 1000);
+}
+
+// Controls
+function toggleTimer() {
+  if (state === 'idle') {
+    state = 'running';
+    ticker = setInterval(tick, 1000);
+    mainBtn.textContent = 'pause';
+    setBreathing(true);
+  } else if (state === 'running') {
+    state = 'paused';
+    clearInterval(ticker); ticker = null;
+    mainBtn.textContent = 'resume';
+    setBreathing(false);
+    countdownEl.classList.add('paused');
+  } else {
+    state = 'running';
+    ticker = setInterval(tick, 1000);
+    mainBtn.textContent = 'pause';
+    setBreathing(true);
+    countdownEl.classList.remove('paused');
+  }
+}
+
+function reset() {
+  clearInterval(ticker); ticker = null;
+  state = 'idle'; mode = 'focus'; sessionNum = 1;
+  sessionEl.textContent = 'session 1';
+  mainBtn.textContent = 'start';
+  ringSvg.classList.remove('breathing','burst','paused');
+  initMode();
+}
+
+function skip() {
+  clearInterval(ticker); ticker = null;
+  remaining = 0;
+  cycleEnd();
+}
+
+function adjustMins(target, delta) {
+  if (target === 'focus') {
+    focusMins = Math.max(1, Math.min(90, focusMins + delta));
+    document.getElementById('focusDisplay').textContent = focusMins;
+  } else {
+    breakMins = Math.max(1, Math.min(30, breakMins + delta));
+    document.getElementById('breakDisplay').textContent = breakMins;
+  }
+  if (state === 'idle' && ((target === 'focus' && mode === 'focus') || (target === 'break' && mode === 'break'))) {
+    initMode();
+  }
+}
+
+document.getElementById('settingsToggle').onclick = () =>
+  document.getElementById('settingsPanel').classList.toggle('open');
+
+// Boot
+initMode();
+loadHistory();
+</script>
 </body>
 </html>
